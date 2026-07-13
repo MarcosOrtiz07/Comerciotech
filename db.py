@@ -2,12 +2,12 @@ from pymongo import MongoClient
 from urllib.parse import quote_plus
 import os
 
-HOST = os.getenv("MONGO_HOST", "100.54.142.187")
+HOST = os.getenv("MONGO_HOST", "32.198.32.165")
 PORT = int(os.getenv("MONGO_PORT", "27017"))
 USER = os.getenv("MONGO_USER", "appUser")
 PASSWORD = quote_plus(os.getenv("MONGO_PASS", "App2025@"))
 
-MONGO_URI = "mongodb://Admin:Admin2005@100.54.142.187:27017/admin?authSource=admin"
+MONGO_URI = "mongodb://Admin:Admin2005@32.198.32.165:27017/admin?authSource=admin"
 MONGO_URI_LOCAL = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 
 try:
