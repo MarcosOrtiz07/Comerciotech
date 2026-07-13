@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+{% block title %}Reportes | ComercioTech{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active" aria-current="page">Reportes</li>{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-bar-chart-line me-2"></i>Reportes</h4>
+    <div>
+        <a href="{{ url_for('reportes.exportar', formato='csv') }}?{{ request.query_string.decode() }}" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV</a>
+        <a href="{{ url_for('reportes.exportar', formato='json') }}?{{ request.query_string.decode() }}" class="btn btn-secondary btn-sm"><i class="bi bi-file-earmark-code me-1"></i>JSON</a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form class="row g-2 align-items-end" method="GET">
+            <div class="col-auto">
+                <label class="form-label small text-muted mb-1">Fecha Inicio</label>
+                <input type="date" name="fecha_inicio" class="form-control form-control-sm" value="{{ filtros.fecha_inicio }}">
+            </div>
+            <div class="col-auto">
+                <label class="form-label small text-muted mb-1">Fecha Fin</label>
+                <input type="date" name="fecha_fin" class="form-control form-control-sm" value="{{ filtros.fecha_fin }}">
+            </div>
+            <div class="col-auto">
+                <label class="form-label small text-muted mb-1">Estado</label>
+                <select name="estado" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    {% for e in estados %}
+                    <option value="{{ e }}" {% if filtros.estado == e %}selected{% endif %}>{{ e }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label small text-muted mb-1">Categoria</label>
+                <select name="categoria" class="form-select form-select-sm">
+                    <option value="">Todas</option>
+                    {% for c in categorias %}
+                    <option value="{{ c }}" {% if filtros.categoria == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto d-flex gap-1">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+                <a href="{{ url_for('reportes.index') }}" class="btn btn-outline-secondary btn-sm">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-start border-primary border-4 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">${{ "%.0f"|format(total_vendido) }}</div>
+                        <div class="stat-label text-muted">Vendido</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-start border-success border-4 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                        <i class="bi bi-ticket-perforated"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">${{ "%.2f"|format(ticket_promedio) }}</div>
+                        <div class="stat-label text-muted">Ticket Prom.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-start border-warning border-4 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
+                        <i class="bi bi-cart-check"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ total_pedidos }}</div>
+                        <div class="stat-label text-muted">Pedidos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-start border-info border-4 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ total_clientes }}</div>
+                        <div class="stat-label text-muted">Clientes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-start border-danger border-4 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ productos_activos }}</div>
+                        <div class="stat-label text-muted">Activos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-start border-dark border-4 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-dark bg-opacity-10 text-dark me-3">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ clientes_con_pedidos }}</div>
+                        <div class="stat-label text-muted">C/Compras</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-graph-up me-2 text-primary"></i>Ventas por Mes</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartVentasMes" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-pie-chart me-2 text-info"></i>Productos mas Vendidos (Ingresos)</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartProdCategoria" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-box-seam me-2 text-success"></i>Stock Actual por Producto</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartStock" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-bar-chart me-2 text-warning"></i>Pedidos por Estado</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartEstado" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-person-plus me-2 text-primary"></i>Clientes Registrados por Mes</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartClientesMes" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-trophy me-2 text-warning"></i>Top 10 Productos Vendidos</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartTopProductos" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-xl-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-star me-2 text-warning"></i>Productos mas Vendidos</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Producto</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-end">Ingresos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in productos_vendidos %}
+                            <tr>
+                                <td class="text-muted">{{ loop.index }}</td>
+                                <td class="fw-semibold">{{ p._id }}</td>
+                                <td class="text-center">{{ p.cantidad_total }}</td>
+                                <td class="text-end fw-semibold">${{ "%.2f"|format(p.ingresos) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">Sin datos de ventas</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-info-circle me-2 text-info"></i>Resumen General</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center">
+                            <div class="fw-bold fs-4 text-primary">{{ total_productos }}</div>
+                            <div class="small text-muted">Total Productos</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center">
+                            <div class="fw-bold fs-4 text-success">{{ productos_activos }}</div>
+                            <div class="small text-muted">Productos Activos</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center">
+                            <div class="fw-bold fs-4 text-warning">{{ total_pedidos }}</div>
+                            <div class="small text-muted">Total Pedidos</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 text-center">
+                            <div class="fw-bold fs-4 text-info">{{ clientes_con_pedidos }}</div>
+                            <div class="small text-muted">Clientes con Compras</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var colors = ['#0d6efd','#6f42c1','#d63384','#dc3545','#fd7e14','#ffc107','#198754','#20c997','#0dcaf0','#adb5bd'];
+
+    var vmLabels = {{ ventas_mes_labels | tojson }};
+    var vmData = {{ ventas_mes_data | tojson }};
+    var ctx1 = document.getElementById('chartVentasMes');
+    if (ctx1) {
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: vmLabels,
+                datasets: [{
+                    label: 'Ventas ($)',
+                    data: vmData,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#0d6efd',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: function(v) { return '$' + v.toLocaleString(); } }
+                    }
+                }
+            }
+        });
+    }
+
+    var prodData = {{ prod_categoria | tojson }};
+    var ctx2 = document.getElementById('chartProdCategoria');
+    if (ctx2 && prodData.length) {
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: prodData.map(function(p) { return p._id; }),
+                datasets: [{
+                    data: prodData.map(function(p) { return p.total; }),
+                    backgroundColor: colors.slice(0, prodData.length),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    var stockLabels = {{ stock_labels | tojson }};
+    var stockValues = {{ stock_values | tojson }};
+    var ctx3 = document.getElementById('chartStock');
+    if (ctx3) {
+        new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: stockLabels,
+                datasets: [{
+                    label: 'Stock',
+                    data: stockValues,
+                    backgroundColor: stockValues.map(function(v) {
+                        return v < 10 ? '#dc3545' : '#198754';
+                    }),
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+
+    var estLabels = {{ estado_labels | tojson }};
+    var estValues = {{ estado_values | tojson }};
+    var ctx4 = document.getElementById('chartEstado');
+    if (ctx4) {
+        new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: estLabels,
+                datasets: [{
+                    label: 'Cantidad',
+                    data: estValues,
+                    backgroundColor: ['#ffc107','#0dcaf0','#0d6efd','#198754','#dc3545'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+
+    var cliLabels = {{ cli_labels | tojson }};
+    var cliData = {{ cli_data | tojson }};
+    var ctx5 = document.getElementById('chartClientesMes');
+    if (ctx5) {
+        new Chart(ctx5, {
+            type: 'line',
+            data: {
+                labels: cliLabels,
+                datasets: [{
+                    label: 'Registros',
+                    data: cliData,
+                    borderColor: '#6f42c1',
+                    backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#6f42c1',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+
+    var prodVendidos = {{ productos_vendidos | tojson }};
+    var ctx6 = document.getElementById('chartTopProductos');
+    if (ctx6 && prodVendidos.length) {
+        new Chart(ctx6, {
+            type: 'bar',
+            data: {
+                labels: prodVendidos.map(function(p) { return p._id; }),
+                datasets: [{
+                    label: 'Cantidad Vendida',
+                    data: prodVendidos.map(function(p) { return p.cantidad_total; }),
+                    backgroundColor: colors.slice(0, prodVendidos.length),
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Usuarios | ComercioTech{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active" aria-current="page">Usuarios</li>{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-person-badge me-2"></i>Usuarios del Sistema</h4>
+    <a href="{{ url_for('usuarios.nuevo') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Nuevo Usuario</a>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form class="row g-2" method="GET">
+            <div class="col-md-6">
+                <input type="search" class="form-control form-control-sm" name="q" placeholder="Buscar por email..." value="{{ busqueda }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search me-1"></i>Buscar</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{{ url_for('usuarios.listar') }}" class="btn btn-outline-secondary btn-sm w-100">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Fecha de Creacion</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in usuarios %}
+                    <tr>
+                        <td class="fw-semibold">
+                            <i class="bi bi-person-circle me-1 text-muted"></i>{{ u.email }}
+                            {% if u.email == session.user %}<span class="badge bg-info ms-1">Tu</span>{% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if u.rol == 'admin' %}primary{% else %}success{% endif %} rounded-pill">
+                                {{ u.rol | capitalize }}
+                            </span>
+                        </td>
+                        <td class="small text-muted">{{ u.created_at.strftime('%d/%m/%Y %H:%M') if u.created_at else '-' }}</td>
+                        <td class="text-end">
+                            <a href="{{ url_for('usuarios.editar', id=u._id_str) }}" class="btn btn-outline-primary btn-sm" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if u.email != session.user %}
+                            <a href="{{ url_for('usuarios.eliminar', id=u._id_str) }}" class="btn btn-outline-danger btn-sm btn-delete" data-name="usuario {{ u.email }}" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center text-muted py-4">No hay usuarios registrados</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

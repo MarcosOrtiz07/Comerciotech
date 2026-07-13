@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ComercioTech | Admin{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <div class="sidebar d-flex flex-column flex-shrink-0 p-3" id="sidebar">
+            <div class="sidebar-header d-flex align-items-center mb-3">
+                <div class="sidebar-logo me-2">
+                    <i class="bi bi-database-gear"></i>
+                </div>
+                <div>
+                    <a href="{{ url_for('admin_dashboard') }}" class="text-decoration-none sidebar-brand">ComercioTech</a>
+                    <div class="sidebar-subtitle">Panel Administrativo</div>
+                </div>
+            </div>
+            <hr class="sidebar-divider">
+
+            <div class="sidebar-user d-flex align-items-center px-2 py-2 mb-2">
+                <div class="avatar me-2">
+                    <i class="bi bi-person-circle fs-4"></i>
+                </div>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="user-name text-truncate small fw-semibold">{{ email }}</div>
+                    <div class="user-role">
+                        <span class="badge bg-primary bg-opacity-25 text-primary rounded-pill" style="font-size:10px;">Administrador</span>
+                    </div>
+                </div>
+            </div>
+            <hr class="sidebar-divider">
+
+            <ul class="nav nav-pills flex-column mb-auto" id="sidebarMenu">
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('clientes.listar') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('clientes.') %}active{% endif %}">
+                        <i class="bi bi-people"></i>
+                        <span>Clientes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('productos.listar') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('productos.') %}active{% endif %}">
+                        <i class="bi bi-box-seam"></i>
+                        <span>Productos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('pedidos.listar') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('pedidos.') %}active{% endif %}">
+                        <i class="bi bi-cart-check"></i>
+                        <span>Pedidos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('reportes.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('reportes.') %}active{% endif %}">
+                        <i class="bi bi-bar-chart-line"></i>
+                        <span>Reportes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('usuarios.listar') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('usuarios.') %}active{% endif %}">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Usuarios</span>
+                    </a>
+                </li>
+            </ul>
+            <hr class="sidebar-divider">
+            <div class="sidebar-footer">
+                <a href="{{ url_for('logout') }}" class="nav-link text-danger">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Cerrar sesion</span>
+                </a>
+            </div>
+        </div>
+
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand navbar-light px-4" id="topNavbar">
+                <div class="container-fluid">
+                    <button class="btn btn-sm btn-outline-secondary d-lg-none me-2" id="sidebarToggle">
+                        <i class="bi bi-list"></i>
+                    </button>
+
+                    <nav aria-label="breadcrumb" class="d-none d-md-block">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Inicio</a></li>
+                            {% block breadcrumb %}{% endblock %}
+                        </ol>
+                    </nav>
+
+                    <form class="d-flex position-relative ms-auto me-3" id="searchForm" autocomplete="off" style="max-width:320px;">
+                        <input class="form-control form-control-sm" type="search" placeholder="Buscar en el sistema..." id="globalSearch" aria-label="Buscar">
+                        <div class="search-results-dropdown" id="searchResults" style="display:none;"></div>
+                    </form>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center small text-muted" id="clockDisplay">
+                            <i class="bi bi-clock me-1"></i>
+                            <span>{{ now.strftime('%d/%m/%Y %H:%M') }}</span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary border-0" id="themeToggle" title="Cambiar tema">
+                            <i class="bi bi-moon-stars"></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid px-4 py-4">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                <i class="bi bi-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-1"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+
+            <footer class="border-top px-4 py-3 text-center text-muted small">
+                <i class="bi bi-database-gear me-1"></i> ComercioTech v1.0.0 &mdash; Panel Administrativo
+            </footer>
+        </div>
+    </div>
+
+    <div id="mongoStatus" class="position-fixed bottom-0 start-0 m-3" style="z-index:9999;">
+        <div class="d-flex align-items-center gap-1 small text-muted bg-dark bg-opacity-75 rounded-pill px-3 py-1">
+            <span class="status-dot-mongo"></span>
+            <span id="mongoLabel">Conectado</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

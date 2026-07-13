@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB Access | Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <canvas id="matrix-canvas"></canvas>
+    <div class="grid-overlay"></div>
+
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+
+    <div class="data-stream"></div>
+    <div class="data-stream"></div>
+    <div class="data-stream"></div>
+    <div class="data-stream"></div>
+    <div class="data-stream"></div>
+    <div class="data-stream"></div>
+    <div class="data-stream"></div>
+
+    <div class="login-container">
+        <div class="card-db">
+            <div class="logo-area">
+                <div class="database-icon">
+                    <div class="cylinder"><span class="cylinder-text">DB</span></div>
+                </div>
+                <h1>Nueva Cuenta</h1>
+                <div class="subtitle">Database Registration</div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form id="registerForm" action="{{ url_for('register') }}" method="POST" novalidate>
+                <div class="form-group">
+                    <label for="email">Correo Electronico</label>
+                    <div class="input-wrapper">
+                        <i class="input-icon">@</i>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="usuario@dominio.com" required>
+                    </div>
+                    <div class="validation-feedback" id="emailFeedback">Ingrese un correo valido (ej: user@domain.com)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contrasena</label>
+                    <div class="input-wrapper">
+                        <i class="input-icon">*</i>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Min. 8 caracteres" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">[~]</button>
+                    </div>
+                    <div class="password-rules">
+                        <div class="rule" id="rule-length">
+                            <span class="rule-icon">&gt;</span>
+                            <span>Minimo 8 caracteres</span>
+                        </div>
+                        <div class="rule" id="rule-upper">
+                            <span class="rule-icon">&gt;</span>
+                            <span>Al menos una mayuscula</span>
+                        </div>
+                        <div class="rule" id="rule-symbol">
+                            <span class="rule-icon">&gt;</span>
+                            <span>Al menos un simbolo especial (!@#$%^&amp;* etc.)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirmar Contrasena</label>
+                    <div class="input-wrapper">
+                        <i class="input-icon">*</i>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Repita la contrasena" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">[~]</button>
+                    </div>
+                    <div class="validation-feedback" id="confirmFeedback">Las contrasenas no coinciden</div>
+                </div>
+
+                <button type="submit" class="btn-db">
+                    <span class="btn-glitch"></span>
+                    REGISTRAR
+                </button>
+            </form>
+
+            <div class="divider"><span>O</span></div>
+
+            <a href="{{ url_for('index') }}" class="link-db">&lt; Volver al inicio de sesion</a>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span>&gt; CONNECTION: <span class="blink">SECURE</span></span>
+        <span>DB ACCESS v2.4.1</span>
+        <span>SERVER: <span id="server-time"></span></span>
+    </div>
+
+    <script>
+        var canvas = document.getElementById('matrix-canvas');
+        var ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        var chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789<>/{}[]|&^%$#@!';
+        var fontSize = 14;
+        var columns = canvas.width / fontSize;
+        var drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(10, 14, 23, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff41';
+            ctx.font = fontSize + 'px monospace';
+            for (var i = 0; i < drops.length; i++) {
+                var text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillStyle = Math.random() > 0.98 ? '#00d4ff' : '#00ff41';
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 50);
+
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        function togglePassword(id) {
+            var pwd = document.getElementById(id);
+            pwd.type = pwd.type === 'password' ? 'text' : 'password';
+        }
+
+        var pwdInput = document.getElementById('password');
+        var confirmInput = document.getElementById('confirm_password');
+        var emailInput = document.getElementById('email');
+
+        function validatePassword() {
+            var val = pwdInput.value;
+            var lenOk = val.length >= 8;
+            var upperOk = /[A-Z]/.test(val);
+            var symbolOk = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+
+            var ruleLen = document.getElementById('rule-length');
+            var ruleUp = document.getElementById('rule-upper');
+            var ruleSym = document.getElementById('rule-symbol');
+
+            ruleLen.className = 'rule' + (lenOk ? ' valid' : ' invalid');
+            ruleUp.className = 'rule' + (upperOk ? ' valid' : ' invalid');
+            ruleSym.className = 'rule' + (symbolOk ? ' valid' : ' invalid');
+        }
+
+        pwdInput.addEventListener('input', validatePassword);
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            var emailVal = emailInput.value.trim();
+            var emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+            var emailValid = emailRe.test(emailVal);
+            var fb = document.getElementById('emailFeedback');
+            if (!emailValid) {
+                e.preventDefault();
+                emailInput.classList.add('is-invalid');
+                fb.classList.add('show');
+            } else {
+                emailInput.classList.remove('is-invalid');
+                fb.classList.remove('show');
+            }
+
+            var val = pwdInput.value;
+            var lenOk = val.length >= 8;
+            var upperOk = /[A-Z]/.test(val);
+            var symbolOk = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+            if (!lenOk || !upperOk || !symbolOk) {
+                e.preventDefault();
+            }
+
+            var confirmFb = document.getElementById('confirmFeedback');
+            if (pwdInput.value !== confirmInput.value) {
+                e.preventDefault();
+                confirmInput.classList.add('is-invalid');
+                confirmFb.classList.add('show');
+            } else {
+                confirmInput.classList.remove('is-invalid');
+                confirmFb.classList.remove('show');
+            }
+        });
+
+        emailInput.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+            document.getElementById('emailFeedback').classList.remove('show');
+        });
+
+        confirmInput.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+            document.getElementById('confirmFeedback').classList.remove('show');
+        });
+
+        function updateClock() {
+            var now = new Date();
+            document.getElementById('server-time').textContent =
+                now.toLocaleTimeString('es-MX', { hour12: false });
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+
+</body>
+</html>

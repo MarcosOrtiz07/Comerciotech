@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if editando else 'Nuevo' }} Cliente | ComercioTech{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-people me-2"></i>{{ 'Editar' if editando else 'Nuevo' }} Cliente</h4>
+    <a href="{{ url_for('clientes.listar') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Volver
+    </a>
+</div>
+
+<div class="card card-form shadow-sm">
+    <div class="card-header">
+        <i class="bi bi-{{ 'pencil-square' if editando else 'person-plus' }} me-2"></i>
+        {{ 'Editar Cliente' if editando else 'Registrar Nuevo Cliente' }}
+    </div>
+    <div class="card-body">
+        <form method="POST" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-sm" name="nombre" value="{{ cliente.nombre or '' }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Apellido <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-sm" name="apellido" value="{{ cliente.apellido or '' }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control form-control-sm" name="email" value="{{ cliente.email or '' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Telefono</label>
+                <input type="text" class="form-control form-control-sm" name="telefono" value="{{ cliente.telefono or '' }}" placeholder="+52 555 123 4567">
+            </div>
+            <div class="col-12">
+                <label class="form-label">Direccion</label>
+                <textarea class="form-control form-control-sm" name="direccion" rows="2">{{ cliente.direccion or '' }}</textarea>
+            </div>
+            <div class="col-12 d-flex gap-2 pt-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>{{ 'Guardar Cambios' if editando else 'Crear Cliente' }}
+                </button>
+                <a href="{{ url_for('clientes.listar') }}" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

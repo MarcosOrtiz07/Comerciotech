@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | ComercioTech{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active" aria-current="page">Dashboard</li>{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="stat-number">{{ total_clientes }}</div>
+                        <div class="stat-label">Clientes</div>
+                        <div class="stat-trend text-primary"><i class="bi bi-arrow-up"></i> +{{ clientes_mes }} este mes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ total_productos }}</div>
+                        <div class="stat-label">Productos</div>
+                        <div class="stat-trend text-success"><i class="bi bi-check-circle"></i> {{ total_productos - sin_stock }} activos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
+                        <i class="bi bi-cart-check"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ total_pedidos }}</div>
+                        <div class="stat-label">Pedidos</div>
+                        <div class="stat-trend text-warning"><i class="bi bi-clock"></i> {{ pendientes }} pendientes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">${{ "{:,.0f}".format(ventas_total) }}</div>
+                        <div class="stat-label">Ventas Totales</div>
+                        <div class="stat-trend text-info"><i class="bi bi-graph-up"></i> Total acumulado</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ stock_bajo }}</div>
+                        <div class="stat-label">Stock Bajo</div>
+                        <div class="stat-trend text-danger"><i class="bi bi-x-circle"></i> {{ sin_stock }} sin stock</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-purple bg-opacity-10 text-purple me-3">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ total_usuarios }}</div>
+                        <div class="stat-label">Usuarios</div>
+                        <div class="stat-trend text-purple"><i class="bi bi-shield-check"></i> Sistema</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-graph-up me-2 text-primary"></i>Ventas Mensuales</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartVentasMes" height="280"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-pie-chart me-2 text-info"></i>Stock por Categoria</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartStockCategoria" height="280"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Productos con Menor Stock</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartStockBajo" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-bar-chart me-2 text-warning"></i>Pedidos por Estado</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartEstados" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-clock-history me-2 text-primary"></i>Ultimos Pedidos</h6>
+                <a href="{{ url_for('pedidos.listar') }}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in ultimos_pedidos %}
+                            <tr>
+                                <td class="fw-semibold">#{{ p._id_str[-6:] }}</td>
+                                <td>{{ p.cliente_nombre }}</td>
+                                <td class="fw-semibold text-primary">${{ "{:,.2f}".format(p.total) }}</td>
+                                <td>
+                                    <span class="badge bg-{% if p.estado == 'Entregado' %}success{% elif p.estado == 'Cancelado' %}danger{% elif p.estado == 'Pendiente' %}warning text-dark{% else %}info{% endif %} rounded-pill">
+                                        {{ p.estado }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted py-4">Sin pedidos recientes</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-arrow-left-right me-2 text-info"></i>Ultimos Movimientos de Stock</h6>
+                <a href="{{ url_for('worker.movimientos') }}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Producto</th>
+                                <th>Tipo</th>
+                                <th class="text-center">Cantidad</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in ultimos_movimientos %}
+                            <tr>
+                                <td class="fw-semibold">{{ m.producto_nombre }}</td>
+                                <td>
+                                    <span class="badge bg-{% if m.tipo == 'entrada' %}success{% else %}danger{% endif %} rounded-pill">
+                                        <i class="bi bi-{% if m.tipo == 'entrada' %}box-arrow-in-down{% else %}box-arrow-up{% endif %} me-1"></i>
+                                        {{ m.tipo | capitalize }}
+                                    </span>
+                                </td>
+                                <td class="text-center fw-bold">{{ m.cantidad }}</td>
+                                <td class="small text-muted">{{ m.fecha_str if m.fecha_str else m.fecha }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted py-4">Sin movimientos recientes</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-xl-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-bell me-2 text-warning"></i>Centro de Notificaciones</h6>
+                <span class="badge bg-danger rounded-pill">{{ stock_bajo + sin_stock }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Producto</th>
+                                <th class="text-center">Stock</th>
+                                <th class="text-end">Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in productos_sin_stock %}
+                            <tr class="table-danger">
+                                <td class="fw-semibold">{{ p.nombre }}</td>
+                                <td class="text-center"><span class="badge bg-danger rounded-pill">0</span></td>
+                                <td class="text-end">${{ "{:,.2f}".format(p.precio) }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% for p in productos_stock_bajo %}
+                            <tr>
+                                <td class="fw-semibold">{{ p.nombre }}</td>
+                                <td class="text-center"><span class="badge bg-warning text-dark rounded-pill">{{ p.stock }}</span></td>
+                                <td class="text-end">${{ "{:,.2f}".format(p.precio) }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% if not productos_sin_stock and not productos_stock_bajo %}
+                            <tr><td colspan="3" class="text-center text-muted py-4">Sin alertas de stock</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-lightning me-2 text-warning"></i>Acceso Rapido</h6>
+            </div>
+            <div class="card-body d-flex flex-column justify-content-center">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a href="{{ url_for('pedidos.nuevo') }}" class="btn btn-primary w-100 py-3">
+                            <i class="bi bi-plus-circle d-block fs-4 mb-1"></i>
+                            <span class="small">Nuevo Pedido</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ url_for('clientes.nuevo') }}" class="btn btn-outline-primary w-100 py-3">
+                            <i class="bi bi-person-plus d-block fs-4 mb-1"></i>
+                            <span class="small">Nuevo Cliente</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ url_for('productos.nuevo') }}" class="btn btn-outline-success w-100 py-3">
+                            <i class="bi bi-box-seam d-block fs-4 mb-1"></i>
+                            <span class="small">Nuevo Producto</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ url_for('reportes.index') }}" class="btn btn-outline-info w-100 py-3">
+                            <i class="bi bi-bar-chart-line d-block fs-4 mb-1"></i>
+                            <span class="small">Ver Reportes</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var colors = ['#0d6efd','#6f42c1','#d63384','#dc3545','#fd7e14','#ffc107','#198754','#20c997','#0dcaf0','#adb5bd'];
+
+    var ctx1 = document.getElementById('chartVentasMes');
+    if (ctx1) {
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels | tojson }},
+                datasets: [{
+                    label: 'Ventas ($)',
+                    data: {{ chart_data | tojson }},
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#0d6efd',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + v.toLocaleString(); } } }
+                }
+            }
+        });
+    }
+
+    var catLabels = {{ cat_labels | tojson }};
+    var catValues = {{ cat_stock_values | tojson }};
+    var ctx2 = document.getElementById('chartStockCategoria');
+    if (ctx2 && catLabels.length) {
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    data: catValues,
+                    backgroundColor: colors.slice(0, catLabels.length),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 12, padding: 12 } }
+                }
+            }
+        });
+    }
+
+    var sl = {{ stock_labels | tojson }};
+    var sv = {{ stock_values | tojson }};
+    var ctx3 = document.getElementById('chartStockBajo');
+    if (ctx3 && sl.length) {
+        new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: sl,
+                datasets: [{
+                    label: 'Stock',
+                    data: sv,
+                    backgroundColor: sv.map(function(v) { return v < 5 ? '#dc3545' : v < 10 ? '#ffc107' : '#198754'; }),
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+
+    var el = {{ estado_labels | tojson }};
+    var ev = {{ estado_values | tojson }};
+    var ctx4 = document.getElementById('chartEstados');
+    if (ctx4 && el.length) {
+        new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: el,
+                datasets: [{
+                    label: 'Cantidad',
+                    data: ev,
+                    backgroundColor: ['#ffc107','#0dcaf0','#0d6efd','#198754','#dc3545'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComercioTech | Acceso denegado</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0e17 0%, #1a2332 50%, #0d1b2a 100%);
+            overflow: hidden;
+        }
+        .error-container { text-align: center; padding: 20px; }
+        .error-code {
+            font-size: 120px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #dc3545, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .error-title {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .error-desc {
+            color: rgba(255,255,255,0.4);
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+        .error-icon {
+            font-size: 64px;
+            color: rgba(220,53,69,0.2);
+            margin-bottom: 16px;
+        }
+        .btn-home {
+            padding: 10px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #dc3545, #ff6b6b);
+            border: none;
+            color: #fff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220,53,69,0.4);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon"><i class="bi bi-shield-exclamation"></i></div>
+        <div class="error-code">403</div>
+        <div class="error-title">Acceso denegado</div>
+        <div class="error-desc">No tienes permisos suficientes para acceder a esta pagina</div>
+        <a href="{{ url_for('index') }}" class="btn-home">
+            <i class="bi bi-house-door"></i> Volver al inicio
+        </a>
+    </div>
+</body>
+</html>
